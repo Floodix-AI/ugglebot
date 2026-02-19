@@ -1,5 +1,5 @@
 """
-Ugglebot — LED-kontroll för ReSpeaker 2-Mic HAT
+Uggly — LED-kontroll för ReSpeaker 2-Mic HAT
 ReSpeaker har 3 APA102 RGB LEDs styrda via SPI.
 Körs bara på Raspberry Pi — no-op på Mac/Linux.
 

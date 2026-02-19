@@ -1,5 +1,5 @@
 """
-Ugglebot — Voice Activity Detection (VAD)
+Uggly — Voice Activity Detection (VAD)
 Använder Silero VAD via ONNX Runtime direkt (ingen PyTorch).
 Extremt lättviktig: ~2 MB modell + ~30 MB onnxruntime.
 """

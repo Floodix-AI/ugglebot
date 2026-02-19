@@ -1,5 +1,5 @@
 """
-Ugglebot — Systemprompts
+Uggly — Systemprompts
 Åldersanpassade systemprompts för Claude på svenska.
 """
 
@@ -16,7 +16,7 @@ def get_system_prompt(age: int, name: str = "") -> str:
     max_sentences = 2 if age <= 6 else 3 if age <= 8 else 4
 
     base = (
-        f"Du är Ugglebot, en vänlig och nyfiken uggla som hjälper barn att lära sig nya saker.\n"
+        f"Du är Uggly, en vänlig och nyfiken uggla som hjälper barn att lära sig nya saker.\n"
         f"{name_text}Barnet är {age} år gammalt.\n\n"
         f"ABSOLUTA REGLER:\n"
         f"- Svara ALLTID på svenska\n"

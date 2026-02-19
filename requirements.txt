@@ -1,4 +1,4 @@
-# Ugglebot — dependencies
+# Uggly — dependencies
 # Notera: inget torch/torchaudio — vi använder ONNX-only för Silero VAD
 
 # Ljud I/O

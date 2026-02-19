@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ugglebot — Lokalt testscript
+Uggly — Lokalt testscript
 Testar varje komponent separat och hela pipeline.
 
 Användning:
@@ -191,14 +191,14 @@ def test_llm():
 
     print("\n=== LLM-test ===")
     test_messages = [
-        "Hej Ugglebot! Vad kan du?",
+        "Hej Uggly! Vad kan du?",
         "Varför är himlen blå?",
     ]
 
     for msg in test_messages:
         print(f"\n👦 Barn: '{msg}'")
         response = llm.chat(msg)
-        print(f"🦉 Ugglebot: '{response}'")
+        print(f"🦉 Uggly: '{response}'")
 
     print(f"\n💰 Dagens kostnad: {cost.get_daily_total_sek():.4f} SEK")
     print("✅ LLM-test klart!")
@@ -215,7 +215,7 @@ def test_tts():
     tts = TextToSpeech(cost, audio)
 
     print("\n=== TTS-test ===")
-    test_text = "Hej! Jag är Ugglebot, en klok och vänlig uggla. Vad vill du prata om idag?"
+    test_text = "Hej! Jag är Uggly, en klok och vänlig uggla. Vad vill du prata om idag?"
     print(f"Genererar tal: '{test_text}'")
 
     tts.speak(test_text)
@@ -356,7 +356,7 @@ TESTS = {
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] not in TESTS:
-        print("Ugglebot — Testscript")
+        print("Uggly — Testscript")
         print(f"\nAnvändning: python {sys.argv[0]} <test>")
         print(f"\nTillgängliga tester:")
         for name in TESTS:

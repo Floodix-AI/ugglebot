@@ -1,5 +1,5 @@
 """
-Ugglebot — Text-to-Speech
+Uggly — Text-to-Speech
 Konverterar text till tal med ElevenLabs API (streaming).
 Fallback till gTTS om ElevenLabs-kvota tar slut.
 """

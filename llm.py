@@ -1,5 +1,5 @@
 """
-Ugglebot — LLM-integration
+Uggly — LLM-integration
 Skickar barnets text till Claude API och hanterar konversationshistorik.
 """
 

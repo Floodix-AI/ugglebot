@@ -1,8 +1,8 @@
-# Ugglebot 🦉
+# Uggly 🦉
 
 AI-driven röstassistent för barn (4–10 år) som körs på Raspberry Pi Zero 2 W med ReSpeaker 2-Mics HAT.
 
-Barnet pratar till en fysisk uggla-leksak och Ugglebot svarar med röst — på svenska!
+Barnet pratar till en fysisk uggla-leksak och Uggly svarar med röst — på svenska!
 
 ## Så fungerar det
 
@@ -113,7 +113,7 @@ ugglebot/
 
 ## Kostnadskontroll
 
-Ugglebot spårar varje API-anrop i `cost_log.json` och stänger automatiskt av sig vid daglig budgetgräns (default: 5 SEK/dag).
+Uggly spårar varje API-anrop i `cost_log.json` och stänger automatiskt av sig vid daglig budgetgräns (default: 5 SEK/dag).
 
 ```bash
 # Se dagens kostnader

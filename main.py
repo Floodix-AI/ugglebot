@@ -1,5 +1,5 @@
 """
-Ugglebot — Huvudprogram
+Uggly — Huvudprogram
 AI-driven röstassistent för barn (4–10 år).
 
 State machine:
@@ -51,8 +51,16 @@ class State(enum.Enum):
 def run() -> None:
     """Huvudloop — startar state machine."""
 
+    # === Synka inställningar från Supabase ===
+    try:
+        from config_sync import fetch_settings, apply_settings
+        settings = fetch_settings()
+        apply_settings(settings)
+    except Exception as e:
+        log.warning("Config sync misslyckades: %s — använder lokala inställningar", e)
+
     # === Initiera komponenter ===
-    log.info("Ugglebot startar...")
+    log.info("Uggly startar...")
 
     from audio import AudioManager
     from wake_word import WakeDetector
@@ -81,18 +89,18 @@ def run() -> None:
 
     # === Graceful shutdown ===
     def handle_shutdown(sig, frame):
-        log.info("Avslutar Ugglebot...")
+        log.info("Avslutar Uggly...")
         led.set_state("off")
         led.cleanup()
         wake.cleanup()
         audio.cleanup()
-        log.info("Ugglebot avslutad.")
+        log.info("Uggly avslutad.")
         sys.exit(0)
 
     signal.signal(signal.SIGINT, handle_shutdown)
     signal.signal(signal.SIGTERM, handle_shutdown)
 
-    log.info("Ugglebot redo! Väntar på tal...")
+    log.info("Uggly redo! Väntar på tal...")
 
     # === Huvudloop ===
     while True:
@@ -102,7 +110,7 @@ def run() -> None:
             match state:
                 # ─── SLEEPING ────────────────────────────────────
                 case State.SLEEPING:
-                    log.info("💤 Ugglebot sover... lyssnar efter tal")
+                    log.info("💤 Uggly sover... lyssnar efter tal")
                     audio.start_input_stream(VAD_CHUNK_SIZE)
                     wake.reset()
 

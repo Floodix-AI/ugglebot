@@ -1,5 +1,5 @@
 """
-Ugglebot — Speech-to-Text
+Uggly — Speech-to-Text
 Skickar inspelat ljud till OpenAI Whisper API för transkription.
 """
 

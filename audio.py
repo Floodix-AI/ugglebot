@@ -1,5 +1,5 @@
 """
-Ugglebot — Ljud I/O
+Uggly — Ljud I/O
 Hanterar mikrofon-inspelning och ljuduppspelning.
 Fungerar på både Mac/Linux (utveckling) och Raspberry Pi (produktion).
 """

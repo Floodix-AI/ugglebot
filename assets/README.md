@@ -1,6 +1,6 @@
-# Ugglebot — assets
+# Uggly — assets
 
-Denna mapp innehåller ljudfiler och modeller som Ugglebot behöver.
+Denna mapp innehåller ljudfiler och modeller som Uggly behöver.
 
 ## Filer som behövs
 

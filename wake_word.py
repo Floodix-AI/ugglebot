@@ -1,7 +1,7 @@
 """
-Ugglebot — Wake-detektion
+Uggly — Wake-detektion
 Använder Silero VAD för att detektera att någon börjar prata.
-Ingen separat wake word — barnet pratar bara och Ugglebot vaknar.
+Ingen separat wake word — barnet pratar bara och Uggly vaknar.
 
 Kräver sammanhängande tal i ~600 ms för att trigga (konfigurerbart),
 med högre VAD-threshold än i inspelningsläge för att undvika

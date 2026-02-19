@@ -1,5 +1,5 @@
 """
-Ugglebot — Kostnadsspårning
+Uggly — Kostnadsspårning
 Loggar alla API-anrop till JSON-fil och kontrollerar daglig budget.
 """
 

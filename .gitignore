@@ -11,6 +11,10 @@ venv/
 # Cost log
 cost_log.json
 
+# Device sync (generated at runtime)
+.device_id
+device_settings_cache.json
+
 # Audio files (generated)
 *.wav
 *.mp3

@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================================
-# Ugglebot — Raspberry Pi Setup Script
-# Sätter upp allt som behövs för att köra Ugglebot på Pi Zero 2 W
+# Uggly — Raspberry Pi Setup Script
+# Sätter upp allt som behövs för att köra Uggly på Pi Zero 2 W
 # med ReSpeaker 2-Mics HAT.
 #
 # Användning:
@@ -15,7 +15,7 @@ UGGLEBOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV_DIR="$UGGLEBOT_DIR/.venv"
 
 echo "============================================"
-echo "  Ugglebot — Raspberry Pi Setup"
+echo "  Uggly — Raspberry Pi Setup"
 echo "============================================"
 echo ""
 
@@ -117,7 +117,7 @@ echo "[9/9] Skapar systemd-service..."
 SERVICE_FILE="/etc/systemd/system/ugglebot.service"
 sudo tee "$SERVICE_FILE" > /dev/null << EOF
 [Unit]
-Description=Ugglebot - AI röstassistent för barn
+Description=Uggly - AI röstassistent för barn
 After=network-online.target sound.target
 Wants=network-online.target
 
@@ -158,7 +158,7 @@ echo ""
 echo "  3. Testa hela pipeline:"
 echo "     python test_local.py pipeline"
 echo ""
-echo "  4. Starta Ugglebot:"
+echo "  4. Starta Uggly:"
 echo "     python main.py"
 echo ""
 echo "  5. Aktivera autostart vid boot:"
@@ -182,4 +182,4 @@ else
 fi
 
 echo ""
-echo "🦉 Ugglebot är redo! Starta med: python main.py"
+echo "🦉 Uggly är redo! Starta med: python main.py"

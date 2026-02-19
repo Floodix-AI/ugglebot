@@ -1,5 +1,5 @@
 """
-Ugglebot — Konfiguration
+Uggly — Konfiguration
 All konfiguration samlas här. Värden laddas från .env-fil.
 """
 

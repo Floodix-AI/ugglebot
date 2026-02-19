@@ -1,5 +1,5 @@
 [Unit]
-Description=Ugglebot — AI-röstassistent för barn
+Description=Uggly — AI-röstassistent för barn
 After=network-online.target sound.target
 Wants=network-online.target
 

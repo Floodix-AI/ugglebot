@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Environment
+.env
+
+# Cost log
+cost_log.json
+
+# Audio files (generated)
+*.wav
+*.mp3
+!assets/README.md
+
+# ONNX model (downloaded, not tracked)
+assets/silero_vad.onnx
+
+# Claude Code
+.claude/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

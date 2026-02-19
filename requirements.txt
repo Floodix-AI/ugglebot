@@ -1,0 +1,25 @@
+# Ugglebot — dependencies
+# Notera: inget torch/torchaudio — vi använder ONNX-only för Silero VAD
+
+# Ljud I/O
+pyaudio>=0.2.14
+
+# ONNX Runtime för Silero VAD (ingen PyTorch behövs)
+onnxruntime>=1.16
+
+# API-klienter
+openai>=1.0
+anthropic>=0.40
+elevenlabs>=1.0
+
+# Miljövariabler
+python-dotenv>=1.0
+
+# Numeriska operationer
+numpy>=1.24
+
+# Ljudbearbetning
+pydub>=0.25
+
+# Gratis TTS-fallback om ElevenLabs-kvota tar slut
+gtts>=2.3

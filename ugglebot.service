@@ -1,0 +1,26 @@
+[Unit]
+Description=Ugglebot — AI-röstassistent för barn
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=robink
+WorkingDirectory=/home/robink/ugglebot
+ExecStart=/home/robink/ugglebot/.venv/bin/python main.py
+Restart=on-failure
+RestartSec=5
+
+# Miljö
+Environment=PYTHONUNBUFFERED=1
+
+# Ljudåtkomst
+SupplementaryGroups=audio gpio spi
+
+# Logga till journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ugglebot
+
+[Install]
+WantedBy=multi-user.target

@@ -22,6 +22,40 @@ CACHE_PATH = PROJECT_DIR / "device_settings_cache.json"
 UGGLY_API_URL = os.getenv("UGGLY_API_URL", "")
 
 
+def _speak_pairing_code(code: str) -> None:
+    """Läs upp parkopplingskoden via TTS (om tillgänglig)."""
+    try:
+        # Bokstavera koden tydligt
+        spelled = " ".join(code.upper())
+        text = f"Din parkopplingskod är: {spelled}. Igen: {spelled}."
+        log.info("Läser upp parkopplingskod via TTS")
+
+        from gtts import gTTS
+        from pydub import AudioSegment
+        import io
+
+        tts = gTTS(text=text, lang="sv")
+        mp3_buf = io.BytesIO()
+        tts.write_to_fp(mp3_buf)
+        mp3_buf.seek(0)
+
+        audio_segment = AudioSegment.from_mp3(mp3_buf)
+        audio_segment = (
+            audio_segment
+            .set_frame_rate(16000)
+            .set_channels(1)
+            .set_sample_width(2)
+        )
+
+        from audio import AudioManager
+        audio = AudioManager()
+        audio.play_pcm_bytes(audio_segment.raw_data, sample_rate=16000, sample_width=2)
+        audio.cleanup()
+
+    except Exception as e:
+        log.warning("Kunde inte läsa upp parkopplingskod: %s", e)
+
+
 def _get_api_key() -> str:
     """Läs API-nyckel från fil eller env."""
     if API_KEY_PATH.exists():
@@ -75,6 +109,9 @@ def register_device() -> dict:
                 log.info("  PARKOPPLINGSKOD:  %s", pairing_code)
                 log.info("  Ange koden på din Uggly-dashboard")
                 log.info("═══════════════════════════════════════")
+
+                # Läs upp parkopplingskoden via TTS
+                _speak_pairing_code(pairing_code)
             else:
                 log.error("Ogiltig registreringsdata: %s", data)
 
@@ -190,3 +227,28 @@ def apply_settings(settings: dict) -> None:
             log.debug("config.%s = %s", config_attr, value)
 
     log.info("Inställningar applicerade")
+
+
+def clear_wifi_setup_flag() -> bool:
+    """Meddela backend att WiFi-setup är klar (rensa wifi_setup_requested)."""
+    device_id = _get_device_id()
+    api_key = _get_api_key()
+
+    if not UGGLY_API_URL or not device_id or not api_key:
+        return False
+
+    url = f"{UGGLY_API_URL}/api/devices/{device_id}/wifi-setup-done"
+    payload = json.dumps({"done": True}).encode()
+
+    req = Request(url, data=payload, headers={
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    })
+
+    try:
+        with urlopen(req, timeout=10):
+            log.info("WiFi-setup-flagga rensad")
+            return True
+    except (URLError, TimeoutError) as e:
+        log.warning("Kunde inte rensa WiFi-setup-flagga: %s", e)
+        return False

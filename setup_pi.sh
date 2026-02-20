@@ -36,7 +36,19 @@ sudo apt install -y \
     ffmpeg \
     mpg123 \
     libasound2-dev \
-    libsndfile1
+    libsndfile1 \
+    network-manager \
+    dnsmasq
+
+# --- 2b. Konfigurera NetworkManager + dnsmasq ---
+echo ""
+echo "Konfigurerar NetworkManager för WiFi-hantering..."
+# Avaktivera dnsmasq autostart (vi startar den manuellt vid WiFi-setup)
+sudo systemctl disable dnsmasq 2>/dev/null || true
+sudo systemctl stop dnsmasq 2>/dev/null || true
+# Säkerställ att NetworkManager hanterar wlan0
+sudo systemctl enable NetworkManager
+sudo systemctl start NetworkManager
 
 # --- 3. Aktivera SPI (för ReSpeaker LEDs) ---
 echo ""
@@ -118,8 +130,8 @@ SERVICE_FILE="/etc/systemd/system/ugglebot.service"
 sudo tee "$SERVICE_FILE" > /dev/null << EOF
 [Unit]
 Description=Uggly - AI röstassistent för barn
-After=network-online.target sound.target
-Wants=network-online.target
+After=sound.target
+Wants=sound.target
 
 [Service]
 Type=simple

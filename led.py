@@ -9,6 +9,7 @@ States → LED-mönster:
   recording:   Grön fast
   processing:  Gul pulsering (snabb)
   speaking:    Vit pulsering (medium)
+  setup:       Lila pulsering (medium) — WiFi-setup
   error:       Röd blink
   off:         Alla av
 """
@@ -140,6 +141,12 @@ class ReSpeakerLEDController(LEDController):
                 else:
                     self._all_off()
                 time.sleep(0.1)
+
+            elif state == "setup":
+                # Lila pulsering (medium, 1.5 sek cykel) — WiFi-setup
+                brightness = int(2 + 13 * (0.5 + 0.5 * math.sin(t * 1.33 * math.pi)))
+                self._write_leds([(150, 0, 200)] * NUM_LEDS, brightness=brightness)
+                time.sleep(0.05)
 
             elif state == "budget":
                 # Röd fast

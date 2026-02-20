@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uggly — WiFi-setup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #1a1726;
+    color: #e8e5f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+
+  h1, h2 {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+  }
+
+  .logo {
+    font-size: 48px;
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    font-size: 24px;
+    color: #f0be3a;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: #a9a2d4;
+    font-size: 14px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .card {
+    background: #2a2540;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 16px;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3d3660;
+    transition: background 0.3s;
+  }
+
+  .step-dot.active { background: #f0be3a; }
+  .step-dot.done { background: #2a9d8f; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #a9a2d4;
+    margin-bottom: 6px;
+    margin-top: 16px;
+  }
+
+  label:first-child { margin-top: 0; }
+
+  select, input[type="password"], input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #3d3660;
+    border-radius: 10px;
+    background: #1a1726;
+    color: #e8e5f5;
+    font-size: 16px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  select:focus, input:focus {
+    border-color: #f0be3a;
+  }
+
+  select { cursor: pointer; }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-primary {
+    background: #f0be3a;
+    color: #1a1726;
+  }
+
+  .btn-secondary {
+    background: #3d3660;
+    color: #e8e5f5;
+  }
+
+  .btn-success {
+    background: #2a9d8f;
+    color: #fff;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border: 4px solid #3d3660;
+    border-top-color: #f0be3a;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 24px auto;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-text {
+    text-align: center;
+    font-size: 15px;
+    color: #a9a2d4;
+  }
+
+  .error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .error.show { display: block; }
+
+  .pairing-code {
+    font-family: 'Nunito', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: 8px;
+    color: #f0be3a;
+    text-align: center;
+    padding: 20px;
+    background: #1a1726;
+    border-radius: 12px;
+    margin: 16px 0;
+  }
+
+  .success-icon {
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .success-text {
+    text-align: center;
+    color: #40b4a6;
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .network-signal {
+    float: right;
+    color: #6b62a0;
+    font-size: 13px;
+  }
+
+  .hidden { display: none; }
+
+  .manual-ssid {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b62a0;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .info-text {
+    font-size: 13px;
+    color: #6b62a0;
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  .note {
+    background: rgba(232, 168, 23, 0.1);
+    border: 1px solid rgba(232, 168, 23, 0.2);
+    color: #f5d36e;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 16px;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo">🦉</div>
+<h1>Uggly WiFi-setup</h1>
+<p class="subtitle">Anslut din Uggly till WiFi</p>
+
+<div class="step-indicator">
+  <div class="step-dot active" id="dot1"></div>
+  <div class="step-dot" id="dot2"></div>
+  <div class="step-dot" id="dot3"></div>
+</div>
+
+<!-- Steg 1: Välj nätverk -->
+<div class="card" id="step1">
+  <label for="ssid-select">Välj WiFi-nätverk</label>
+  <select id="ssid-select">
+    <option value="">Söker nätverk...</option>
+  </select>
+
+  <div id="manual-ssid-area" class="hidden">
+    <label for="ssid-input">Nätverksnamn (SSID)</label>
+    <input type="text" id="ssid-input" placeholder="Skriv nätverksnamn">
+  </div>
+
+  <p class="manual-ssid" id="toggle-manual" onclick="toggleManualSsid()">
+    Mitt nätverk syns inte
+  </p>
+
+  <label for="password">Lösenord</label>
+  <input type="password" id="password" placeholder="WiFi-lösenord">
+
+  <div class="note">
+    Uggly stödjer bara 2.4 GHz WiFi-nätverk.
+    Om du har ett 5 GHz-nätverk, välj 2.4 GHz-varianten.
+  </div>
+
+  <div class="error" id="error-msg"></div>
+
+  <button class="btn btn-primary" id="connect-btn" onclick="connectWifi()">
+    Anslut
+  </button>
+</div>
+
+<!-- Steg 2: Ansluter -->
+<div class="card hidden" id="step2">
+  <div class="spinner"></div>
+  <p class="status-text">Ansluter till WiFi...</p>
+  <p class="info-text" style="text-align:center; margin-top:12px">
+    Detta kan ta upp till 30 sekunder
+  </p>
+</div>
+
+<!-- Steg 3: Klart -->
+<div class="card hidden" id="step3">
+  <div class="success-icon">✅</div>
+  <p class="success-text">WiFi anslutet!</p>
+
+  <div id="pairing-section" class="hidden">
+    <label style="text-align:center; margin-top:20px">Din parkopplingskod</label>
+    <div class="pairing-code" id="pairing-code">------</div>
+    <p class="info-text" style="text-align:center">
+      Ange koden i Uggly-appen för att parkoppla enheten.
+      Uggly läser också upp koden.
+    </p>
+  </div>
+
+  <p class="info-text" style="text-align:center; margin-top:16px">
+    Du kan stänga denna sida nu.
+  </p>
+</div>
+
+<script>
+let manualMode = false;
+
+async function loadNetworks() {
+  try {
+    const resp = await fetch('/scan');
+    const data = await resp.json();
+    const select = document.getElementById('ssid-select');
+    select.innerHTML = '';
+
+    if (data.networks.length === 0) {
+      select.innerHTML = '<option value="">Inga nätverk hittades</option>';
+      return;
+    }
+
+    select.innerHTML = '<option value="">Välj nätverk...</option>';
+    for (const net of data.networks) {
+      const bars = net.signal > 70 ? '▓▓▓' : net.signal > 40 ? '▓▓░' : '▓░░';
+      const opt = document.createElement('option');
+      opt.value = net.ssid;
+      opt.textContent = `${net.ssid}  ${bars}`;
+      select.appendChild(opt);
+    }
+  } catch (e) {
+    console.error('Scan error:', e);
+  }
+}
+
+function toggleManualSsid() {
+  manualMode = !manualMode;
+  document.getElementById('manual-ssid-area').classList.toggle('hidden', !manualMode);
+  document.getElementById('ssid-select').classList.toggle('hidden', manualMode);
+  document.getElementById('toggle-manual').textContent =
+    manualMode ? 'Välj från lista' : 'Mitt nätverk syns inte';
+}
+
+function showStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('step' + i).classList.toggle('hidden', i !== n);
+    const dot = document.getElementById('dot' + i);
+    dot.classList.toggle('active', i === n);
+    dot.classList.toggle('done', i < n);
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('error-msg').classList.remove('show');
+}
+
+async function connectWifi() {
+  hideError();
+
+  const ssid = manualMode
+    ? document.getElementById('ssid-input').value.trim()
+    : document.getElementById('ssid-select').value;
+  const password = document.getElementById('password').value;
+
+  if (!ssid) {
+    showError('Välj eller skriv in ett nätverksnamn');
+    return;
+  }
+
+  // Steg 2: Ansluter...
+  showStep(2);
+
+  try {
+    await fetch('/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ssid, password }),
+    });
+  } catch (e) {
+    // Förväntat — HTTP-anslutning bryts när hotspot stängs av
+  }
+
+  // Polla status (anslutningen kanske tar tid)
+  let connected = false;
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const resp = await fetch('/status');
+      const data = await resp.json();
+      if (data.connected) {
+        connected = true;
+        if (data.pairing_code) {
+          document.getElementById('pairing-code').textContent = data.pairing_code;
+          document.getElementById('pairing-section').classList.remove('hidden');
+        }
+        break;
+      }
+    } catch (e) {
+      // Hotspot kanske stängdes — det är ok, vänta och se
+    }
+  }
+
+  if (connected) {
+    showStep(3);
+  } else {
+    // Misslyckades — tillbaka till steg 1
+    showStep(1);
+    showError('Kunde inte ansluta. Kontrollera lösenordet och försök igen.');
+    loadNetworks(); // Ladda om nätverk (hotspot startades om)
+  }
+}
+
+// Ladda nätverk vid sidladdning
+loadNetworks();
+</script>
+
+</body>
+</html>

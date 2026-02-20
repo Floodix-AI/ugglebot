@@ -53,6 +53,13 @@ class State(enum.Enum):
 def run() -> None:
     """Huvudloop — startar state machine."""
 
+    # === WiFi-check — säkerställ internetanslutning ===
+    try:
+        from wifi_setup import wait_for_wifi_or_setup
+        wait_for_wifi_or_setup()
+    except Exception as e:
+        log.warning("WiFi-check misslyckades: %s — fortsätter ändå", e)
+
     # === Registrera + synka inställningar ===
     try:
         from config_sync import ensure_registered, fetch_settings, apply_settings
@@ -104,6 +111,20 @@ def run() -> None:
 
     signal.signal(signal.SIGINT, handle_shutdown)
     signal.signal(signal.SIGTERM, handle_shutdown)
+
+    # === Kolla om dashboard begärt WiFi-byte ===
+    try:
+        from config_sync import fetch_settings as _fs
+        _s = _fs()
+        if _s.get("wifi_setup_requested"):
+            log.info("WiFi-byte begärd från dashboard — startar setup")
+            from wifi_setup import run_wifi_setup
+            run_wifi_setup(led=led, tts=tts)
+            # Meddela backend att setup är klar
+            from config_sync import clear_wifi_setup_flag
+            clear_wifi_setup_flag()
+    except Exception as e:
+        log.debug("WiFi-setup-check misslyckades: %s", e)
 
     log.info("Uggly redo! Väntar på tal...")
     tts.speak_file(STARTUP_SOUND_PATH)

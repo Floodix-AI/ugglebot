@@ -51,11 +51,14 @@ class State(enum.Enum):
 def run() -> None:
     """Huvudloop — startar state machine."""
 
-    # === Synka inställningar från Supabase ===
+    # === Registrera + synka inställningar ===
     try:
-        from config_sync import fetch_settings, apply_settings
-        settings = fetch_settings()
-        apply_settings(settings)
+        from config_sync import ensure_registered, fetch_settings, apply_settings
+        if ensure_registered():
+            settings = fetch_settings()
+            apply_settings(settings)
+        else:
+            log.warning("Registrering misslyckades — använder lokala inställningar")
     except Exception as e:
         log.warning("Config sync misslyckades: %s — använder lokala inställningar", e)
 

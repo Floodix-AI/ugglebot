@@ -1,13 +1,13 @@
 """
 Uggly — Config Sync
-Hämtar inställningar från Supabase vid start, cachar lokalt.
-Skickar usage-data och heartbeat.
+Registrerar enheten automatiskt vid första uppstart.
+Hämtar inställningar från webbplattformen, cachar lokalt.
+Skickar usage-data via API.
 """
 
 import json
 import logging
 import os
-import uuid
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import URLError
@@ -16,33 +16,96 @@ log = logging.getLogger("config_sync")
 
 PROJECT_DIR = Path(__file__).parent
 DEVICE_ID_PATH = PROJECT_DIR / ".device_id"
+API_KEY_PATH = PROJECT_DIR / ".api_key"
 CACHE_PATH = PROJECT_DIR / "device_settings_cache.json"
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-DEVICE_API_KEY = os.getenv("DEVICE_API_KEY", "")
+UGGLY_API_URL = os.getenv("UGGLY_API_URL", "")
 
 
-def get_device_id() -> str:
-    """Hämta eller generera enhetens UUID."""
+def _get_api_key() -> str:
+    """Läs API-nyckel från fil eller env."""
+    if API_KEY_PATH.exists():
+        return API_KEY_PATH.read_text().strip()
+    return os.getenv("DEVICE_API_KEY", "")
+
+
+def _get_device_id() -> str:
+    """Läs device-ID från fil."""
     if DEVICE_ID_PATH.exists():
         return DEVICE_ID_PATH.read_text().strip()
-    device_id = str(uuid.uuid4())
-    DEVICE_ID_PATH.write_text(device_id)
-    log.info("Nytt device-ID genererat: %s", device_id)
-    return device_id
+    return ""
+
+
+def is_registered() -> bool:
+    """Kontrollera om enheten är registrerad."""
+    return bool(_get_device_id() and _get_api_key())
+
+
+def register_device() -> dict:
+    """
+    Registrera enheten på webbplattformen.
+    Returnerar { device_id, api_key, pairing_code }.
+    Sparar device_id och api_key lokalt.
+    """
+    if not UGGLY_API_URL:
+        log.error("UGGLY_API_URL saknas — kan inte registrera")
+        return {}
+
+    url = f"{UGGLY_API_URL}/api/devices/register"
+    req = Request(
+        url,
+        data=b"{}",
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode())
+
+            device_id = data.get("device_id", "")
+            api_key = data.get("api_key", "")
+            pairing_code = data.get("pairing_code", "")
+
+            if device_id and api_key:
+                DEVICE_ID_PATH.write_text(device_id)
+                API_KEY_PATH.write_text(api_key)
+                log.info("Enhet registrerad!")
+                log.info("═══════════════════════════════════════")
+                log.info("  PARKOPPLINGSKOD:  %s", pairing_code)
+                log.info("  Ange koden på din Uggly-dashboard")
+                log.info("═══════════════════════════════════════")
+            else:
+                log.error("Ogiltig registreringsdata: %s", data)
+
+            return data
+
+    except (URLError, TimeoutError, json.JSONDecodeError) as e:
+        log.error("Registrering misslyckades: %s", e)
+        return {}
+
+
+def ensure_registered() -> bool:
+    """Registrera om inte redan registrerad. Returnerar True om redo."""
+    if is_registered():
+        return True
+    log.info("Enheten är inte registrerad — registrerar nu...")
+    result = register_device()
+    return bool(result.get("device_id"))
 
 
 def fetch_settings() -> dict:
-    """Hämta inställningar från Supabase. Returnerar cachade vid fel."""
-    device_id = get_device_id()
+    """Hämta inställningar från webbplattformen. Returnerar cachade vid fel."""
+    device_id = _get_device_id()
+    api_key = _get_api_key()
 
-    if not SUPABASE_URL or not DEVICE_API_KEY:
-        log.warning("SUPABASE_URL eller DEVICE_API_KEY saknas — använder cache/defaults")
+    if not UGGLY_API_URL or not device_id or not api_key:
+        log.warning("Credentials saknas — använder cache/defaults")
         return _load_cache()
 
-    url = f"{SUPABASE_URL}/api/devices/{device_id}/config"
+    url = f"{UGGLY_API_URL}/api/devices/{device_id}/config"
     req = Request(url, headers={
-        "Authorization": f"Bearer {DEVICE_API_KEY}",
+        "Authorization": f"Bearer {api_key}",
     })
 
     try:
@@ -50,34 +113,32 @@ def fetch_settings() -> dict:
             data = json.loads(resp.read().decode())
             settings = data.get("settings", {})
             _save_cache(settings)
-            log.info("Inställningar hämtade från Supabase")
+            log.info("Inställningar hämtade från webbplattformen")
             return settings
     except (URLError, TimeoutError, json.JSONDecodeError) as e:
         log.warning("Kunde inte hämta inställningar: %s — använder cache", e)
         return _load_cache()
 
 
-def upload_usage(device_id: str, usage_data: dict) -> bool:
-    """Skicka usage-data till Supabase."""
-    if not SUPABASE_URL or not DEVICE_API_KEY:
+def upload_usage(usage_data: dict) -> bool:
+    """Skicka usage-data till webbplattformen."""
+    device_id = _get_device_id()
+    api_key = _get_api_key()
+
+    if not UGGLY_API_URL or not device_id or not api_key:
         return False
 
-    url = f"{SUPABASE_URL}/rest/v1/usage_logs"
-    payload = json.dumps({
-        "device_id": device_id,
-        **usage_data,
-    }).encode()
+    url = f"{UGGLY_API_URL}/api/devices/{device_id}/usage"
+    payload = json.dumps(usage_data).encode()
 
     req = Request(url, data=payload, headers={
-        "Authorization": f"Bearer {DEVICE_API_KEY}",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        "apikey": DEVICE_API_KEY,
-        "Prefer": "return=minimal",
     })
 
     try:
         with urlopen(req, timeout=10):
-            log.info("Usage-data skickad till Supabase")
+            log.info("Usage-data skickad")
             return True
     except (URLError, TimeoutError) as e:
         log.warning("Kunde inte skicka usage-data: %s", e)
@@ -128,4 +189,4 @@ def apply_settings(settings: dict) -> None:
             setattr(config, config_attr, value)
             log.debug("config.%s = %s", config_attr, value)
 
-    log.info("Inställningar applicerade från Supabase")
+    log.info("Inställningar applicerade")

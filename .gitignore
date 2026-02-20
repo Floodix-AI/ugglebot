@@ -13,6 +13,7 @@ cost_log.json
 
 # Device sync (generated at runtime)
 .device_id
+.api_key
 device_settings_cache.json
 
 # Audio files (generated)

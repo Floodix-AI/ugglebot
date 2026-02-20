@@ -41,6 +41,7 @@ class AudioManager:
         respeaker_keywords = ["seeed", "respeaker", "2mic", "ac108"]
         device_count = self._pa.get_device_count()
 
+        # Steg 1: Sök enheter som rapporterar rätt antal kanaler
         for i in range(device_count):
             info = self._pa.get_device_info_by_index(i)
             name = info.get("name", "").lower()
@@ -48,10 +49,20 @@ class AudioManager:
             if max_ch > 0:
                 for keyword in respeaker_keywords:
                     if keyword in name:
-                        # ReSpeaker 2-Mics kräver 2 kanaler för input
                         ch = min(max_ch, 2) if is_input else CHANNELS
                         log.info("Hittade ReSpeaker %s: %s (%d ch)", "mic" if is_input else "output", info["name"], ch)
                         return i, ch
+
+        # Steg 2: PortAudio-bugg med WM8960 — rapporterar 0 input-kanaler
+        # trots att ALSA capture fungerar. Tvinga device om vi hittar ReSpeaker.
+        if is_input:
+            for i in range(device_count):
+                info = self._pa.get_device_info_by_index(i)
+                name = info.get("name", "").lower()
+                for keyword in respeaker_keywords:
+                    if keyword in name:
+                        log.info("ReSpeaker hittad med 0 input-kanaler (PortAudio-bugg) — tvingar device %d med 2 ch", i)
+                        return i, 2
 
         # Fallback till default
         try:

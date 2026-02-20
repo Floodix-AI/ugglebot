@@ -19,12 +19,14 @@ import logging
 import signal
 import sys
 import time
+from datetime import date
 
 from config import (
     IDLE_TIMEOUT_SECONDS,
     SESSION_MAX_MINUTES,
     VAD_CHUNK_SIZE,
     VAD_THRESHOLD,
+    STARTUP_SOUND_PATH,
     WAKE_SOUND_PATH,
     THINKING_SOUND_PATH,
     GOODNIGHT_SOUND_PATH,
@@ -104,6 +106,7 @@ def run() -> None:
     signal.signal(signal.SIGTERM, handle_shutdown)
 
     log.info("Uggly redo! Väntar på tal...")
+    tts.speak_file(STARTUP_SOUND_PATH)
 
     # === Huvudloop ===
     while True:
@@ -226,6 +229,18 @@ def run() -> None:
                         # 2. End-to-end streaming: LLM → ElevenLabs WebSocket → högtalare
                         led.set_state("speaking")
                         tts.speak_realtime(llm.chat_stream(text))
+
+                        # 3. Rapportera usage till Supabase (i bakgrunden)
+                        try:
+                            from config_sync import upload_usage
+                            summary = cost.get_summary()
+                            upload_usage({
+                                "date": date.today().isoformat(),
+                                "total_sek": summary["daily_sek"],
+                                "interactions": 1,
+                            })
+                        except Exception as ue:
+                            log.debug("Usage-rapportering misslyckades: %s", ue)
 
                         state = State.LISTENING
                         last_activity = time.time()

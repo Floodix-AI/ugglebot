@@ -81,6 +81,7 @@ IS_RASPBERRY_PI = (
 LED_ENABLED = os.getenv("LED_ENABLED", "auto")  # "auto", "true", "false"
 
 # === Ljudfiler ===
+STARTUP_SOUND_PATH = ASSETS_DIR / "startup.wav"
 WAKE_SOUND_PATH = ASSETS_DIR / "wake.wav"
 THINKING_SOUND_PATH = ASSETS_DIR / "thinking.wav"
 GOODNIGHT_SOUND_PATH = ASSETS_DIR / "goodnight.wav"

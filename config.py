@@ -44,7 +44,7 @@ VAD_CHUNK_SIZE = 512      # 32 ms vid 16 kHz — Silero VAD optimal
 
 # === VAD (Voice Activity Detection) ===
 VAD_THRESHOLD = float(os.getenv("VAD_THRESHOLD", "0.5"))
-SILENCE_DURATION = float(os.getenv("SILENCE_DURATION", "1.5"))       # sek tystnad = slut på inspelning
+SILENCE_DURATION = float(os.getenv("SILENCE_DURATION", "0.8"))       # sek tystnad = slut på inspelning
 MAX_RECORDING_DURATION = float(os.getenv("MAX_RECORDING_DURATION", "30"))  # max sek per inspelning
 
 # === Wake-detektion (VAD-baserad) ===

@@ -209,12 +209,16 @@ def run() -> None:
                     log.info("🤔 Bearbetar...")
                     led.set_state("processing")
 
-                    # Spela tänkeljud i bakgrunden (om filen finns)
-                    tts.speak_file(THINKING_SOUND_PATH)
-
                     try:
-                        # Budget-koll sker inuti stt och llm
-                        # 1. Speech-to-text
+                        # Spela tänkeljud i bakgrundstråd medan Whisper körs
+                        import threading
+                        threading.Thread(
+                            target=tts.speak_file,
+                            args=(THINKING_SOUND_PATH,),
+                            daemon=True,
+                        ).start()
+
+                        # 1. Speech-to-text (körs parallellt med tänkeljudet)
                         text = stt.transcribe(bytes(recorded_audio))
                         recorded_audio.clear()
 
